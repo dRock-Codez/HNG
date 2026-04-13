@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Todo Card — Stage 0</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+
+    :root{
+      --card:rgba(15,14,22,.82);
+      --card-hi:rgba(24,23,36,.9);
+      --border:rgba(255,255,255,.1);
+      --border-hi:rgba(255,255,255,.18);
+      --text:#f8f8fc;
+      --text-2:#c8c8da;
+      --text-3:#8a8a9e;
+      --accent:#a78bfa;
+      --accent-dim:rgba(167,139,250,.14);
+      --accent-mid:rgba(167,139,250,.28);
+      --green:#4ade80;
+      --green-dim:rgba(74,222,128,.14);
+      --orange:#fbbf24;
+      --orange-dim:rgba(251,191,36,.14);
+      --red:#fb7185;
+      --red-dim:rgba(251,113,133,.12);
+      --radius:16px;
+      --mono:'Space Mono',monospace;
+      --sans:'Plus Jakarta Sans',sans-serif;
+    }
+
+    body{
+      font-family:var(--sans);
+      background:linear-gradient(-45deg,#6c3ce7,#e73c7e,#23a6d5,#23d5ab,#f7971e,#a855f7);
+      background-size:500% 500%;
+      animation:bgShift 18s ease infinite;
+      color:var(--text);
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      padding:1.5rem;
+      overflow:hidden;
+    }
+
+    @keyframes bgShift{
+      0%{background-position:0% 50%}
+      25%{background-position:50% 100%}
+      50%{background-position:100% 50%}
+      75%{background-position:50% 0%}
+      100%{background-position:0% 50%}
+    }
+
+    /* Noise texture */
+    body::after{
+      content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.06;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      background-repeat:repeat;background-size:128px;
+    }
+
+    /* ── Topbar ── */
+    .topbar{
+      position:relative;z-index:2;
+      display:flex;align-items:center;gap:.6rem;
+      margin-bottom:2rem;
+      font-size:.7rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+      color:rgba(255,255,255,.55);
+    }
+    .topbar .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green);}
+
+    /* ── CARD ── */
+    .todo-card{
+      position:relative;z-index:1;
+      background:var(--card);
+      backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      width:100%;max-width:480px;
+      overflow:hidden;
+      transition:transform .6s cubic-bezier(.19,1,.22,1),box-shadow .6s ease,opacity .4s ease;
+      box-shadow:0 24px 64px -15px rgba(0,0,0,.5);
+    }
+    .todo-card:hover{
+      transform:translateY(-6px);
+      box-shadow:0 0 80px -10px rgba(255,255,255,.08),0 32px 80px -15px rgba(0,0,0,.6);
+      border-color:var(--border-hi);
+    }
+    .todo-card.completed{opacity:.5;transform:scale(.98);}
+    .todo-card.completed .title{color:var(--text-3);}
+    .todo-card.completed .strike{transform:scaleX(1);}
+
+    /* Accent edge */
+    .card-edge{height:3px;background:linear-gradient(90deg,var(--accent),var(--green),var(--orange),var(--red));opacity:.9;}
+
+    .card-inner{padding:1.75rem 1.75rem 1.5rem;display:flex;flex-direction:column;gap:1.25rem;}
+
+    /* ── Header ── */
+    .card-header{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;}
+    .title-group{display:flex;flex-direction:column;gap:.4rem;flex:1;min-width:0;}
+    .title-wrap{position:relative;display:inline-block;}
+    .title{font-size:1.35rem;font-weight:800;line-height:1.3;letter-spacing:-.01em;color:var(--text);transition:color .4s;}
+    .strike{
+      position:absolute;left:0;top:54%;height:2px;width:100%;
+      background:var(--text-3);border-radius:1px;
+      transform:scaleX(0);transform-origin:left;
+      transition:transform .5s cubic-bezier(.22,1,.36,1);
+    }
+    .subtitle{font-size:.78rem;color:var(--text-3);font-weight:500;}
+
+    /* Priority */
+    .priority{
+      display:flex;align-items:center;gap:.4rem;
+      font-family:var(--mono);font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+      padding:.4rem .85rem;border-radius:8px;white-space:nowrap;
+      background:var(--red-dim);color:var(--red);border:1px solid rgba(251,113,133,.3);
+    }
+    .priority::before{
+      content:'';width:6px;height:6px;border-radius:50%;background:var(--red);
+      box-shadow:0 0 8px var(--red);
+      animation:blink 2s ease-in-out infinite;flex-shrink:0;
+    }
+    @keyframes blink{0%,100%{opacity:1;}50%{opacity:.2;}}
+
+    /* Description */
+    .desc{font-size:.9rem;color:var(--text-2);line-height:1.65;}
+
+    /* ── Stats ── */
+    .stats{
+      display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
+      background:var(--border);border-radius:12px;overflow:hidden;
+    }
+    .stat{background:var(--card-hi);padding:1rem;display:flex;flex-direction:column;gap:.35rem;}
+    .stat:first-child{border-radius:12px 0 0 12px;}
+    .stat:last-child{border-radius:0 12px 12px 0;}
+    .stat-label{font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:var(--text-3);}
+    .stat-val{font-size:.88rem;font-weight:700;color:var(--text);transition:color .3s;}
+    .stat-val.mono{font-family:var(--mono);font-size:.8rem;}
+
+    /* ── Tags ── */
+    .tags{list-style:none;display:flex;flex-wrap:wrap;gap:.4rem;}
+    .tag{
+      font-size:.65rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+      padding:.35rem .75rem;border-radius:6px;
+      background:var(--accent-dim);border:1px solid var(--accent-mid);color:var(--accent);
+      transition:all .2s;cursor:default;
+    }
+    .tag:hover{background:var(--accent-mid);transform:translateY(-1px);}
+    .tag.t-green{background:var(--green-dim);border-color:rgba(74,222,128,.28);color:var(--green);}
+    .tag.t-orange{background:var(--orange-dim);border-color:rgba(251,191,36,.28);color:var(--orange);}
+
+    /* ── Footer ── */
+    .card-footer{
+      display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;
+      padding:1rem 1.75rem 1.25rem;
+      background:var(--card-hi);border-top:1px solid var(--border);
+    }
+
+    .cb-wrap{display:flex;align-items:center;gap:.65rem;cursor:pointer;}
+    .cb-wrap input[type="checkbox"]{
+      appearance:none;-webkit-appearance:none;
+      width:22px;height:22px;border:2px solid var(--text-3);border-radius:6px;
+      cursor:pointer;position:relative;flex-shrink:0;
+      background:transparent;transition:all .3s cubic-bezier(.4,0,.2,1);
+    }
+    .cb-wrap input:checked{background:var(--green);border-color:var(--green);box-shadow:0 0 12px rgba(74,222,128,.35);}
+    .cb-wrap input:checked::after{
+      content:'';position:absolute;left:5px;top:1px;
+      width:6px;height:11px;
+      border:solid #0a0a0f;border-width:0 2.5px 2.5px 0;
+      transform:rotate(45deg);
+    }
+    .cb-wrap input:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+    .cb-label{font-size:.82rem;font-weight:600;cursor:pointer;user-select:none;color:var(--text-2);}
+
+    .actions{display:flex;gap:.4rem;}
+    .btn{
+      font-family:var(--sans);font-size:.74rem;font-weight:700;
+      padding:.5rem .9rem;border-radius:8px;border:1px solid var(--border);
+      cursor:pointer;transition:all .2s;background:transparent;color:var(--text-2);
+    }
+    .btn:hover{background:rgba(255,255,255,.08);color:var(--text);border-color:var(--border-hi);}
+    .btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+    .btn-del:hover{background:var(--red-dim);color:var(--red);border-color:rgba(251,113,133,.3);}
+
+    @media(max-width:480px){
+      .card-inner{padding:1.25rem;}
+      .card-footer{padding:1rem 1.25rem;}
+      .stats{grid-template-columns:1fr;}
+      .stat{border-radius:0!important;}
+      .stat:first-child{border-radius:12px 12px 0 0!important;}
+      .stat:last-child{border-radius:0 0 12px 12px!important;}
+      .card-footer{flex-direction:column;align-items:stretch;}
+      .actions .btn{flex:1;text-align:center;}
+      .title{font-size:1.15rem;}
+    }
+
+    .todo-card{animation:cardIn .8s cubic-bezier(.16,1,.3,1) both;}
+    @keyframes cardIn{from{opacity:0;transform:translateY(30px) scale(.97);}}
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="dot"></div>
+    Task Manager <span>—</span> Active
+  </div>
+
+  <article data-testid="test-todo-card" class="todo-card" id="todo-card">
+    <div class="card-edge" aria-hidden="true"></div>
+    <div class="card-inner">
+      <header class="card-header">
+        <div class="title-group">
+          <div class="title-wrap">
+            <h2 data-testid="test-todo-title" class="title">Build Frontend Todo Card</h2>
+            <span class="strike" aria-hidden="true"></span>
+          </div>
+          <span class="subtitle">Frontend Wizards — Stage 0 Submission</span>
+        </div>
+        <span data-testid="test-todo-priority" class="priority" aria-label="Priority: High">High</span>
+      </header>
+
+      <p data-testid="test-todo-description" class="desc">
+        Ship a testable, accessible, and responsive Todo Card component with semantic HTML, WCAG AA compliance, and a polished executive-grade UI.
+      </p>
+
+      <div class="stats">
+        <div class="stat">
+          <span class="stat-label">Status</span>
+          <strong data-testid="test-todo-status" class="stat-val" id="todo-status">Pending</strong>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Deadline</span>
+          <time data-testid="test-todo-due-date" class="stat-val mono" datetime="2026-04-16T23:59:00Z">Due Apr 16, 2026</time>
+        </div>
+        <div class="stat" aria-live="polite">
+          <span class="stat-label">Remaining</span>
+          <time data-testid="test-todo-time-remaining" class="stat-val mono" id="time-rem">—</time>
+        </div>
+      </div>
+
+      <ul role="list" data-testid="test-todo-tags" class="tags">
+        <li data-testid="test-todo-tag-work" class="tag">work</li>
+        <li data-testid="test-todo-tag-urgent" class="tag t-orange">urgent</li>
+        <li class="tag t-green">stage-0</li>
+      </ul>
+    </div>
+
+    <footer class="card-footer">
+      <label class="cb-wrap" for="toggle">
+  <input type="checkbox" data-testid="test-todo-complete-toggle" id="toggle">
+  <span class="cb-label">Mark done</span>
+</label>
+      <div class="actions">
+        <button data-testid="test-todo-edit-button" class="btn" aria-label="Edit task">Edit</button>
+        <button data-testid="test-todo-delete-button" class="btn btn-del" aria-label="Delete task">Delete</button>
+      </div>
+    </footer>
+  </article>
+
+  <script>
+    (()=>{
+      const due=new Date('2026-04-16T23:59:00Z'),rem=document.getElementById('time-rem');
+      function tick(){
+        const d=due-Date.now();
+        if(d < 0){
+  const h = Math.floor(-d / 36e5);
+  rem.textContent = h > 0 ? `Overdue by ${h} hours` : 'Overdue';
+  rem.style.color='var(--red)';return;}
+        const days=Math.floor(d/864e5),hrs=Math.floor((d%864e5)/36e5),mins=Math.floor((d%36e5)/6e4);
+        if(days > 1){
+  rem.textContent = `Due in ${days} days`;
+  rem.style.color = 'var(--green)';
+}
+else if(days === 1){
+  rem.textContent = 'Due tomorrow';
+  rem.style.color = 'var(--orange)';
+}
+else if(hrs > 0){
+  rem.textContent = `Due in ${hrs} hours`;
+  rem.style.color = 'var(--red)';
+}
+else if(mins > 0){
+  rem.textContent = `Due in ${mins} minutes`;
+  rem.style.color = 'var(--red)';
+}
+else{
+  rem.textContent = 'Due now!';
+  rem.style.color = 'var(--red)';
+}
+      }
+      tick();setInterval(tick,60000);
+
+      const t=document.getElementById('toggle'),c=document.getElementById('todo-card'),s=document.getElementById('todo-status');
+      t.addEventListener('change',e=>{
+        if(navigator.vibrate)navigator.vibrate(40);
+        c.classList.toggle('completed',e.target.checked);
+        s.textContent=e.target.checked?'Done':'Pending';
+        s.style.color=e.target.checked?'var(--green)':'';
+      });
+
+      document.querySelector('[data-testid="test-todo-edit-button"]').addEventListener('click',()=>console.log('edit clicked'));
+      document.querySelector('[data-testid="test-todo-delete-button"]').addEventListener('click',()=>alert('Delete clicked'));
+    })();
+  </script>
+</body>
+</html>
