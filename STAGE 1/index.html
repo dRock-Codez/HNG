@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Advanced Todo Card — Stage 1a</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+
+    :root{
+      --card:rgba(15,14,22,.82);
+      --card-hi:rgba(24,23,36,.9);
+      --border:rgba(255,255,255,.1);
+      --border-hi:rgba(255,255,255,.18);
+      --text:#f8f8fc;
+      --text-2:#c8c8da;
+      --text-3:#8a8a9e;
+      --accent:#a78bfa;
+      --accent-dim:rgba(167,139,250,.14);
+      --accent-mid:rgba(167,139,250,.28);
+      --green:#4ade80;
+      --green-dim:rgba(74,222,128,.14);
+      --orange:#fbbf24;
+      --orange-dim:rgba(251,191,36,.14);
+      --red:#fb7185;
+      --red-dim:rgba(251,113,133,.12);
+      --blue:#60a5fa;
+      --radius:16px;
+      --mono:'Space Mono',monospace;
+      --sans:'Plus Jakarta Sans',sans-serif;
+    }
+
+    body{
+      font-family:var(--sans);
+      background:linear-gradient(-45deg,#6c3ce7,#e73c7e,#23a6d5,#23d5ab,#f7971e,#a855f7);
+      background-size:500% 500%;
+      animation:bgShift 18s ease infinite;
+      color:var(--text);
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      padding:1.5rem;
+      overflow-x:hidden;
+    }
+
+    @keyframes bgShift{
+      0%{background-position:0% 50%}
+      25%{background-position:50% 100%}
+      50%{background-position:100% 50%}
+      75%{background-position:50% 0%}
+      100%{background-position:0% 50%}
+    }
+
+    body::after{
+      content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.06;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      background-repeat:repeat;background-size:128px;
+    }
+
+    .topbar{
+      position:relative;z-index:2;
+      display:flex;align-items:center;gap:.6rem;
+      margin-bottom:2rem;
+      font-size:.7rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+      color:rgba(255,255,255,.55);
+    }
+    .topbar .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green);}
+
+    /* ── CARD ── */
+    .todo-card{
+      position:relative;z-index:1;
+      background:var(--card);
+      backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      width:100%;max-width:480px;
+      overflow:hidden;
+      transition:transform .6s cubic-bezier(.19,1,.22,1),box-shadow .6s ease,opacity .4s ease;
+      box-shadow:0 24px 64px -15px rgba(0,0,0,.5);
+    }
+    .todo-card:hover{
+      transform:translateY(-6px);
+      box-shadow:0 0 80px -10px rgba(255,255,255,.08),0 32px 80px -15px rgba(0,0,0,.6);
+      border-color:var(--border-hi);
+    }
+
+    /* States */
+    .todo-card.completed{opacity:.6;transform:scale(.98);}
+    .todo-card.completed .title{color:var(--text-3);}
+    .todo-card.completed .strike{transform:scaleX(1);}
+    .todo-card.in-progress .card-edge{background:var(--blue);box-shadow:0 0 15px rgba(96,165,250,.4);}
+    .todo-card.overdue-state .card-edge{background:var(--red);box-shadow:0 0 15px rgba(251,113,133,.5);}
+
+    .card-edge{height:3px;background:linear-gradient(90deg,var(--accent),var(--green),var(--orange),var(--red));opacity:.9;transition:all .3s;}
+    .card-inner{padding:1.75rem 1.75rem 1.5rem;display:flex;flex-direction:column;gap:1.25rem;}
+
+    /* ── Header ── */
+    .card-header{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;}
+    .title-group{display:flex;flex-direction:column;gap:.4rem;flex:1;min-width:0;}
+    .title-wrap{position:relative;display:inline-block;}
+    .title{font-size:1.35rem;font-weight:800;line-height:1.3;letter-spacing:-.01em;color:var(--text);transition:color .4s;word-wrap:break-word;}
+    .strike{
+      position:absolute;left:0;top:54%;height:2px;width:100%;
+      background:var(--text-3);border-radius:1px;
+      transform:scaleX(0);transform-origin:left;
+      transition:transform .5s cubic-bezier(.22,1,.36,1);
+    }
+    .subtitle{font-size:.78rem;color:var(--text-3);font-weight:500;}
+
+    /* Priority Indicator */
+    .priority-wrap{
+      display:flex;align-items:center;gap:.4rem;
+      font-family:var(--mono);font-size:.65rem;font-weight:700;text-transform:uppercase;
+      padding:.4rem .85rem;border-radius:8px;white-space:nowrap;
+      background:var(--card-hi);border:1px solid var(--border);
+    }
+    .priority-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+    .priority-wrap[data-level="High"] .priority-dot{background:var(--red);box-shadow:0 0 8px var(--red);animation:blink 2s ease-in-out infinite;}
+    .priority-wrap[data-level="Medium"] .priority-dot{background:var(--orange);box-shadow:0 0 8px var(--orange);}
+    .priority-wrap[data-level="Low"] .priority-dot{background:var(--green);box-shadow:0 0 8px var(--green);}
+    @keyframes blink{0%,100%{opacity:1;}50%{opacity:.2;}}
+
+    /* Description Expand/Collapse */
+    .desc-wrapper{position:relative;}
+    .desc-collapsible{
+      overflow:hidden;
+      display:-webkit-box;
+      -webkit-line-clamp:2;
+      -webkit-box-orient:vertical;
+      transition:all .3s ease;
+    }
+    .desc-collapsible.expanded{
+      display:block;
+      -webkit-line-clamp:unset;
+    }
+    .desc{font-size:.9rem;color:var(--text-2);line-height:1.65;}
+    .btn-expand{
+      background:none;border:none;color:var(--accent);font-size:.75rem;font-weight:700;
+      margin-top:.4rem;cursor:pointer;text-decoration:underline;text-underline-offset:3px;
+    }
+
+    /* ── Stats ── */
+    .stats{
+      display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
+      background:var(--border);border-radius:12px;overflow:hidden;
+    }
+    .stat{background:var(--card-hi);padding:.8rem;display:flex;flex-direction:column;gap:.35rem;}
+    .stat-label{font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-3);display:flex;justify-content:space-between;}
+    .stat-val{font-size:.85rem;font-weight:700;color:var(--text);transition:color .3s;}
+    .stat-val.mono{font-family:var(--mono);font-size:.75rem;}
+    
+    .status-select{
+      background:transparent;border:none;color:var(--text);font-family:inherit;font-weight:700;
+      font-size:.85rem;outline:none;cursor:pointer;width:100%;
+    }
+    .status-select option{background:var(--card-hi);color:var(--text);}
+    
+    .overdue-badge{background:var(--red);color:#fff;padding:2px 4px;border-radius:4px;font-size:.5rem;display:none;}
+    .overdue-badge.visible{display:inline-block;}
+
+    /* ── Tags ── */
+    .tags{list-style:none;display:flex;flex-wrap:wrap;gap:.4rem;}
+    .tag{
+      font-size:.65rem;font-weight:700;text-transform:uppercase;
+      padding:.35rem .75rem;border-radius:6px;
+      background:var(--accent-dim);border:1px solid var(--accent-mid);color:var(--accent);
+    }
+
+    /* ── Footer ── */
+    .card-footer{
+      display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;
+      padding:1rem 1.75rem;background:var(--card-hi);border-top:1px solid var(--border);
+    }
+    .cb-wrap{display:flex;align-items:center;gap:.65rem;cursor:pointer;}
+    .cb-wrap input[type="checkbox"]{
+      appearance:none;-webkit-appearance:none;
+      width:22px;height:22px;border:2px solid var(--text-3);border-radius:6px;
+      cursor:pointer;position:relative;background:transparent;transition:all .2s;
+    }
+    .cb-wrap input:checked{background:var(--green);border-color:var(--green);}
+    .cb-wrap input:checked::after{
+      content:'';position:absolute;left:5px;top:1px;width:6px;height:11px;
+      border:solid #0a0a0f;border-width:0 2.5px 2.5px 0;transform:rotate(45deg);
+    }
+    .cb-label{font-size:.82rem;font-weight:600;color:var(--text-2);}
+    .actions{display:flex;gap:.4rem;}
+    .btn{
+      font-family:var(--sans);font-size:.74rem;font-weight:700;
+      padding:.5rem .9rem;border-radius:8px;border:1px solid var(--border);
+      cursor:pointer;transition:all .2s;background:transparent;color:var(--text-2);
+    }
+    .btn:hover{background:rgba(255,255,255,.08);color:var(--text);}
+    .btn-del:hover{background:var(--red-dim);color:var(--red);border-color:rgba(251,113,133,.3);}
+
+    /* ── Edit Form ── */
+    .edit-form{display:none;flex-direction:column;gap:1rem;}
+    .edit-form.active{display:flex;}
+    .display-mode{display:flex;flex-direction:column;gap:1.25rem;}
+    .display-mode.hidden{display:none;}
+    
+    .form-group{display:flex;flex-direction:column;gap:.4rem;}
+    .form-group label{font-size:.75rem;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;}
+    .form-input{
+      background:rgba(0,0,0,.2);border:1px solid var(--border);border-radius:8px;
+      padding:.75rem;color:var(--text);font-family:inherit;font-size:.9rem;outline:none;
+      transition:border-color .2s;
+    }
+    .form-input:focus{border-color:var(--accent);}
+    textarea.form-input{resize:vertical;min-height:80px;}
+
+    @media(max-width:480px){
+      .card-inner{padding:1.25rem;}
+      .card-footer{padding:1rem 1.25rem;flex-direction:column;align-items:stretch;}
+      .stats{grid-template-columns:1fr;}
+      .actions .btn{flex:1;text-align:center;}
+      .title{font-size:1.15rem;}
+    }
+
+    .todo-card{animation:cardIn .8s cubic-bezier(.16,1,.3,1) both;}
+    @keyframes cardIn{from{opacity:0;transform:translateY(30px) scale(.97);}}
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="dot"></div>
+    Task Manager <span>—</span> Active
+  </div>
+
+  <article data-testid="test-todo-card" class="todo-card" id="todo-card">
+    <div class="card-edge" aria-hidden="true"></div>
+    
+    <div class="card-inner">
+      <div id="display-mode" class="display-mode">
+        <header class="card-header">
+          <div class="title-group">
+            <div class="title-wrap">
+              <h2 data-testid="test-todo-title" class="title" id="display-title">Build Frontend Todo Card</h2>
+              <span class="strike" aria-hidden="true"></span>
+            </div>
+            <span class="subtitle">Frontend Wizards — Stage 1a Submission</span>
+          </div>
+          <div class="priority-wrap" data-level="High">
+            <div data-testid="test-todo-priority-indicator" class="priority-dot"></div>
+            <span data-testid="test-todo-priority" id="display-priority">High</span>
+          </div>
+        </header>
+
+        <div class="desc-wrapper">
+          <div data-testid="test-todo-collapsible-section" id="desc-container" class="desc-collapsible">
+            <p data-testid="test-todo-description" class="desc" id="display-desc">
+              Ship a testable, accessible, and responsive Todo Card component with semantic HTML, WCAG AA compliance, and a polished executive-grade UI. Ensure interactive elements like expanding text and status updates work flawlessly.
+            </p>
+          </div>
+          <button data-testid="test-todo-expand-toggle" id="btn-expand" aria-expanded="false" aria-controls="desc-container" class="btn-expand">Show more</button>
+        </div>
+
+        <div class="stats">
+          <div class="stat">
+            <span class="stat-label">Status</span>
+            <select data-testid="test-todo-status-control" id="display-status" aria-label="Task Status" class="status-select">
+              <option value="Pending">Pending</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Done">Done</option>
+            </select>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Deadline</span>
+            <time data-testid="test-todo-due-date" id="display-due" class="stat-val mono" datetime="2026-04-16T23:59">Apr 16, 2026</time>
+          </div>
+          <div class="stat" aria-live="polite">
+            <span class="stat-label">Remaining <span data-testid="test-todo-overdue-indicator" id="overdue-badge" class="overdue-badge">Overdue</span></span>
+            <time data-testid="test-todo-time-remaining" id="display-rem" class="stat-val mono">—</time>
+          </div>
+        </div>
+
+        <ul role="list" data-testid="test-todo-tags" class="tags">
+          <li data-testid="test-todo-tag-work" class="tag">work</li>
+          <li data-testid="test-todo-tag-urgent" class="tag">urgent</li>
+          <li class="tag">stage-1a</li>
+        </ul>
+      </div>
+
+      <form data-testid="test-todo-edit-form" id="edit-form" class="edit-form">
+        <div class="form-group">
+          <label for="edit-title">Title</label>
+          <input type="text" data-testid="test-todo-edit-title-input" id="edit-title" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label for="edit-desc">Description</label>
+          <textarea data-testid="test-todo-edit-description-input" id="edit-desc" class="form-input" required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="edit-priority">Priority</label>
+          <select data-testid="test-todo-edit-priority-select" id="edit-priority" class="form-input">
+            <option value="Low">Low</option>
+            <option value="Medium">Medium</option>
+            <option value="High">High</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="edit-due">Due Date</label>
+          <input type="datetime-local" data-testid="test-todo-edit-due-date-input" id="edit-due" class="form-input" required>
+        </div>
+        <div class="actions" style="margin-top:1rem; justify-content:flex-end;">
+          <button type="button" data-testid="test-todo-cancel-button" id="btn-cancel" class="btn">Cancel</button>
+          <button type="submit" data-testid="test-todo-save-button" id="btn-save" class="btn" style="background:var(--accent-mid);color:var(--text);border-color:var(--accent);">Save Changes</button>
+        </div>
+      </form>
+    </div>
+
+    <footer class="card-footer" id="card-footer">
+      <label class="cb-wrap" for="toggle">
+        <input type="checkbox" data-testid="test-todo-complete-toggle" id="toggle">
+        <span class="cb-label">Mark done</span>
+      </label>
+      <div class="actions">
+        <button type="button" data-testid="test-todo-edit-button" id="btn-edit" class="btn" aria-label="Edit task">Edit</button>
+        <button type="button" data-testid="test-todo-delete-button" class="btn btn-del" aria-label="Delete task">Delete</button>
+      </div>
+    </footer>
+  </article>
+
+  <script>
+    (()=>{
+      // Component State
+      let state = {
+        title: "Build Frontend Todo Card",
+        desc: "Ship a testable, accessible, and responsive Todo Card component with semantic HTML, WCAG AA compliance, and a polished executive-grade UI. Ensure interactive elements like expanding text and status updates work flawlessly so screen readers and keyboards can navigate smoothly.",
+        priority: "High",
+        status: "Pending", // "Pending", "In Progress", "Done"
+        due: "2026-04-16T23:59"
+      };
+
+      // DOM Elements
+      const card = document.getElementById('todo-card');
+      const displayMode = document.getElementById('display-mode');
+      const editForm = document.getElementById('edit-form');
+      const footer = document.getElementById('card-footer');
+      
+      // Display Elements
+      const dTitle = document.getElementById('display-title');
+      const dDesc = document.getElementById('display-desc');
+      const dPriority = document.getElementById('display-priority');
+      const priorityWrap = document.querySelector('.priority-wrap');
+      const dStatus = document.getElementById('display-status');
+      const dDue = document.getElementById('display-due');
+      const dRem = document.getElementById('display-rem');
+      const cbToggle = document.getElementById('toggle');
+      const overdueBadge = document.getElementById('overdue-badge');
+
+      // Edit Elements
+      const eTitle = document.getElementById('edit-title');
+      const eDesc = document.getElementById('edit-desc');
+      const ePriority = document.getElementById('edit-priority');
+      const eDue = document.getElementById('edit-due');
+      
+      // Buttons
+      const btnEdit = document.getElementById('btn-edit');
+      const btnCancel = document.getElementById('btn-cancel');
+      const btnExpand = document.getElementById('btn-expand');
+      const descContainer = document.getElementById('desc-container');
+
+      // --- Expand / Collapse Logic ---
+      function checkTruncation() {
+        if(descContainer.scrollHeight > descContainer.clientHeight && !descContainer.classList.contains('expanded')) {
+          btnExpand.style.display = 'inline-block';
+        } else if (!descContainer.classList.contains('expanded')) {
+          btnExpand.style.display = 'none';
+        }
+      }
+
+      btnExpand.addEventListener('click', () => {
+        const isExpanded = descContainer.classList.contains('expanded');
+        descContainer.classList.toggle('expanded');
+        btnExpand.setAttribute('aria-expanded', !isExpanded);
+        btnExpand.textContent = isExpanded ? 'Show more' : 'Show less';
+      });
+
+      // --- Core Render Logic ---
+      function render() {
+        // Text values
+        dTitle.textContent = state.title;
+        dDesc.textContent = state.desc;
+        dPriority.textContent = state.priority;
+        priorityWrap.setAttribute('data-level', state.priority);
+        dStatus.value = state.status;
+        
+        // Due Date formatting
+        const dateObj = new Date(state.due);
+        dDue.textContent = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        dDue.setAttribute('datetime', state.due);
+
+        // Visual States based on Status
+        card.classList.remove('completed', 'in-progress');
+        cbToggle.checked = (state.status === 'Done');
+        
+        if (state.status === 'Done') {
+          card.classList.add('completed');
+          dStatus.style.color = 'var(--text-3)';
+        } else if (state.status === 'In Progress') {
+          card.classList.add('in-progress');
+          dStatus.style.color = 'var(--blue)';
+        } else {
+          dStatus.style.color = 'var(--text)';
+        }
+
+        // Re-check text truncation after render
+        setTimeout(checkTruncation, 10);
+        tick(); // Force time update
+      }
+
+      // --- Time & Overdue Logic ---
+      function tick() {
+        if (state.status === 'Done') {
+          dRem.textContent = 'Completed';
+          dRem.style.color = 'var(--text-3)';
+          card.classList.remove('overdue-state');
+          overdueBadge.classList.remove('visible');
+          return;
+        }
+
+        const dueTime = new Date(state.due).getTime();
+        const diff = dueTime - Date.now();
+
+        if (diff < 0) {
+          const hrs = Math.floor(-diff / 36e5);
+          dRem.textContent = hrs > 0 ? `Overdue by ${hrs} hour${hrs > 1 ? 's' : ''}` : 'Overdue';
+          dRem.style.color = 'var(--red)';
+          card.classList.add('overdue-state');
+          overdueBadge.classList.add('visible');
+          return;
+        }
+
+        card.classList.remove('overdue-state');
+        overdueBadge.classList.remove('visible');
+        
+        const days = Math.floor(diff / 864e5);
+        const hrs = Math.floor((diff % 864e5) / 36e5);
+        const mins = Math.floor((diff % 36e5) / 6e4);
+
+        if (days >= 2) {
+          dRem.textContent = `Due in ${days} days`;
+          dRem.style.color = 'var(--green)';
+        } else if (days === 1) {
+          dRem.textContent = 'Due in 1 day';
+          dRem.style.color = 'var(--orange)';
+        } else if (hrs > 0) {
+          dRem.textContent = `Due in ${hrs} hours`;
+          dRem.style.color = 'var(--orange)';
+        } else if (mins > 0) {
+          dRem.textContent = `Due in ${mins} minutes`;
+          dRem.style.color = 'var(--orange)';
+        } else {
+          dRem.textContent = 'Due in less than 1 min';
+          dRem.style.color = 'var(--red)';
+        }
+      }
+      setInterval(tick, 30000); // Update every 30s
+
+      // --- Status Interactions ---
+      dStatus.addEventListener('change', (e) => {
+        state.status = e.target.value;
+        render();
+      });
+
+      cbToggle.addEventListener('change', (e) => {
+        if(navigator.vibrate) navigator.vibrate(40);
+        state.status = e.target.checked ? 'Done' : 'Pending';
+        render();
+      });
+
+      // --- Edit Mode Logic ---
+      btnEdit.addEventListener('click', () => {
+        // Populate inputs
+        eTitle.value = state.title;
+        eDesc.value = state.desc;
+        ePriority.value = state.priority;
+        eDue.value = state.due;
+        
+        // Toggle view
+        displayMode.classList.add('hidden');
+        footer.style.display = 'none';
+        editForm.classList.add('active');
+        eTitle.focus();
+      });
+
+      btnCancel.addEventListener('click', () => {
+        displayMode.classList.remove('hidden');
+        footer.style.display = 'flex';
+        editForm.classList.remove('active');
+        btnEdit.focus(); // Return focus for accessibility
+      });
+
+      editForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        // Update state
+        state.title = eTitle.value;
+        state.desc = eDesc.value;
+        state.priority = ePriority.value;
+        state.due = eDue.value;
+        
+        // Toggle view & re-render
+        displayMode.classList.remove('hidden');
+        footer.style.display = 'flex';
+        editForm.classList.remove('active');
+        render();
+        btnEdit.focus();
+      });
+
+      // Initial Setup
+      render();
+      window.addEventListener('resize', checkTruncation);
+      
+    })();
+  </script>
+</body>
+</html>
