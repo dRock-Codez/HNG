@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile Card — Stage 1b</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --card: rgba(15,14,22,.82);
+      --card-hi: rgba(24,23,36,.9);
+      --border: rgba(255,255,255,.1);
+      --border-hi: rgba(255,255,255,.18);
+      --text: #f8f8fc;
+      --text-2: #c8c8da;
+      --text-3: #8a8a9e;
+      --accent: #a78bfa;
+      --accent-dim: rgba(167,139,250,.14);
+      --accent-mid: rgba(167,139,250,.28);
+      --green: #4ade80;
+      --green-dim: rgba(74,222,128,.14);
+      --red: #fb7185;
+      --red-dim: rgba(251,113,133,.12);
+      --mono: 'Space Mono', monospace;
+      --sans: 'Plus Jakarta Sans', sans-serif;
+      --radius: 16px;
+    }
+
+    body {
+      font-family: var(--sans);
+      background: linear-gradient(-45deg, #6c3ce7, #e73c7e, #23a6d5, #23d5ab, #f7971e, #a855f7);
+      background-size: 500% 500%;
+      animation: bgShift 18s ease infinite;
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 1.5rem;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: .06;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 128px;
+    }
+
+    @keyframes bgShift {
+      0%   { background-position: 0% 50%; }
+      25%  { background-position: 50% 100%; }
+      50%  { background-position: 100% 50%; }
+      75%  { background-position: 50% 0%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .topbar {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      margin-bottom: 2rem;
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.55);
+    }
+
+    .topbar .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 10px var(--green);
+    }
+
+    /* ── CARD ── */
+    .profile-card {
+      position: relative;
+      z-index: 1;
+      background: var(--card);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 520px;
+      overflow: hidden;
+      box-shadow: 0 24px 64px -15px rgba(0,0,0,.5);
+      font-family: var(--sans);
+      color: var(--text);
+      animation: cardIn .8s cubic-bezier(.16,1,.3,1) both;
+      transition: transform .6s cubic-bezier(.19,1,.22,1), box-shadow .6s ease;
+    }
+
+    .profile-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 0 80px -10px rgba(255,255,255,.08), 0 32px 80px -15px rgba(0,0,0,.6);
+      border-color: var(--border-hi);
+    }
+
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(30px) scale(.97); }
+    }
+
+    .card-edge {
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--green), #fbbf24, var(--red));
+      opacity: .9;
+    }
+
+    .card-inner {
+      padding: 1.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    /* ── Header ── */
+    .profile-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.25rem;
+      text-align: center;
+    }
+
+    @media (min-width: 560px) {
+      .profile-header {
+        flex-direction: row;
+        text-align: left;
+        align-items: flex-start;
+      }
+    }
+
+    .profile-figure {
+      margin: 0;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .profile-figure::after {
+      content: '';
+      position: absolute;
+      inset: -5px;
+      border-radius: 50%;
+      background: conic-gradient(var(--accent), var(--green), #fbbf24, var(--red), var(--accent));
+      z-index: -1;
+      filter: blur(10px);
+      opacity: .5;
+      animation: avatarGlow 4s linear infinite;
+    }
+
+    @keyframes avatarGlow { to { transform: rotate(360deg); } }
+
+    .profile-avatar {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--card);
+      outline: 2px solid var(--accent);
+      outline-offset: 3px;
+      display: block;
+      transition: transform .4s cubic-bezier(.16,1,.3,1);
+    }
+
+    .profile-avatar:hover { transform: scale(1.06) rotate(2deg); }
+
+    .profile-headline { flex: 1; }
+
+    .profile-name {
+      font-size: 1.45rem;
+      font-weight: 800;
+      letter-spacing: -.02em;
+      margin: 0 0 .5rem;
+    }
+
+    .profile-bio {
+      font-size: .9rem;
+      line-height: 1.65;
+      color: var(--text-2);
+      margin: 0;
+    }
+
+    /* ── HUD Time Panel ── */
+    .hud-panel {
+      background: var(--card-hi);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: .4rem;
+    }
+
+    .hud-header {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      font-size: .6rem;
+      font-weight: 700;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--text-3);
+    }
+
+    .status-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      animation: blink 2s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+
+    .human-time {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      font-family: var(--mono);
+    }
+
+    .epoch-container {
+      display: flex;
+      gap: .5rem;
+      align-items: center;
+      font-family: var(--mono);
+    }
+
+    .epoch-label {
+      font-size: .6rem;
+      font-weight: 700;
+      color: var(--text-3);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .epoch-value {
+      font-size: .72rem;
+      color: var(--accent);
+    }
+
+    /* ── Lists ── */
+    .profile-lists {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+    }
+
+    @media (min-width: 560px) {
+      .profile-lists { grid-template-columns: 1fr 1fr; }
+    }
+
+    .section-title {
+      font-size: .6rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      color: var(--text-3);
+      margin: 0 0 .75rem;
+      padding-bottom: .4rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tags {
+      list-style: none;
+      padding: 0; margin: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: .4rem;
+    }
+
+    .tag {
+      font-size: .65rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: .35rem .75rem;
+      border-radius: 6px;
+      cursor: default;
+      transition: transform .2s;
+    }
+
+    .tag:hover { transform: translateY(-1px); }
+
+    .tag.t-green {
+      background: var(--green-dim);
+      border: 1px solid rgba(74,222,128,.28);
+      color: var(--green);
+    }
+
+    .tag.t-red {
+      background: var(--red-dim);
+      border: 1px solid rgba(251,113,133,.3);
+      color: var(--red);
+    }
+
+    /* ── Social Nav ── */
+    .profile-nav {
+      background: var(--card-hi);
+      border-top: 1px solid var(--border);
+      padding: 1rem 1.75rem 1.25rem;
+    }
+
+    .social-links {
+      list-style: none;
+      padding: 0; margin: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem;
+      justify-content: center;
+    }
+
+    .btn {
+      font-family: var(--sans);
+      font-size: .74rem;
+      font-weight: 700;
+      text-decoration: none;
+      padding: .5rem .9rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-2);
+      transition: all .2s;
+      cursor: pointer;
+      display: inline-block;
+    }
+
+    .btn:hover {
+      background: rgba(255,255,255,.08);
+      color: var(--text);
+      border-color: var(--border-hi);
+      transform: translateY(-2px);
+    }
+
+    .btn:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    @media (max-width: 480px) {
+      .card-inner { padding: 1.25rem; }
+      .profile-nav { padding: 1rem 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="dot"></div>
+    Profile Card <span>—</span> Active
+  </div>
+
+  <article data-testid="test-profile-card" class="profile-card">
+    <div class="card-edge" aria-hidden="true"></div>
+
+    <div class="card-inner">
+
+      <!-- Header -->
+      <header class="profile-header">
+        <figure class="profile-figure">
+          <img
+            data-testid="test-user-avatar"
+            class="profile-avatar"
+            src="https://i.pravatar.cc/150?img=33"
+            alt="Profile avatar of Alex Dev"
+          />
+        </figure>
+        <div class="profile-headline">
+          <h2 data-testid="test-user-name" class="profile-name">Alex Dev</h2>
+          <p data-testid="test-user-bio" class="profile-bio">
+            Frontend Wizard in training. Passionate about semantic HTML, accessibility,
+            and building pixel-perfect interfaces that work flawlessly across all devices.
+          </p>
+        </div>
+      </header>
+
+      <!-- Live Clock HUD -->
+      <div class="hud-panel" aria-live="polite">
+        <div class="hud-header">
+          <span class="status-dot"></span>
+          SYSTEM CLOCK — ACTIVE
+        </div>
+        <div class="human-time" id="human-time">—</div>
+        <div class="epoch-container">
+          <span class="epoch-label">EPOCH MS:</span>
+          <span data-testid="test-user-time" id="epoch-time" class="epoch-value">—</span>
+        </div>
+      </div>
+
+      <!-- Hobbies & Dislikes -->
+      <div class="profile-lists">
+        <section>
+          <h3 class="section-title">Hobbies</h3>
+          <ul data-testid="test-user-hobbies" class="tags">
+            <li class="tag t-green">Mechanical Keyboards</li>
+            <li class="tag t-green">Bouldering</li>
+            <li class="tag t-green">Open Source CSS</li>
+          </ul>
+        </section>
+
+        <section>
+          <h3 class="section-title">Dislikes</h3>
+          <ul data-testid="test-user-dislikes" class="tags">
+            <li class="tag t-red">Spaghetti Code</li>
+            <li class="tag t-red">Missing Alt Text</li>
+            <li class="tag t-red">Merge Conflicts</li>
+          </ul>
+        </section>
+      </div>
+
+    </div>
+
+    <!-- Social Links -->
+    <nav aria-label="Social media links" class="profile-nav">
+      <ul data-testid="test-user-social-links" class="social-links">
+        <li>
+          
+            data-testid="test-user-social-github"
+            href="https://github.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn"
+          >GitHub</a>
+        </li>
+        <li>
+          
+            data-testid="test-user-social-twitter"
+            href="https://twitter.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn"
+          >Twitter</a>
+        </li>
+        <li>
+          
+            data-testid="test-user-social-linkedin"
+            href="https://linkedin.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn"
+          >LinkedIn</a>
+        </li>
+      </ul>
+    </nav>
+  </article>
+
+  <script>
+    (()=>{
+      const epochEl = document.getElementById('epoch-time');
+      const humanEl = document.getElementById('human-time');
+
+      function tick() {
+        const now = Date.now();
+        epochEl.textContent = now;
+        humanEl.textContent = new Date(now).toLocaleString('en-US', {
+          weekday: 'short', month: 'short', day: 'numeric',
+          hour: '2-digit', minute: '2-digit', second: '2-digit'
+        });
+      }
+
+      tick();
+      setInterval(tick, 500);
+    })();
+  </script>
+
+</body>
+</html>
