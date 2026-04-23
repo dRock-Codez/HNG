@@ -1,0 +1,87 @@
+:root {
+  /* Brand */
+  --color-primary: #7c5dfa;
+  --color-primary-hover: #9277ff;
+  --color-accent: #ec5757;
+  --color-accent-hover: #ff9797;
+
+  /* Status */
+  --color-status-paid: #33d69f;
+  --color-status-pending: #ff8f00;
+
+  /* Typography */
+  --font-sans: 'League Spartan', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* Sizing */
+  --sidebar-width: 103px;
+  --sidebar-height: 72px;
+  --content-max: 730px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 20px;
+  --radius-xl: 24px;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
+  --duration-slow: 400ms;
+
+  /* Shadow */
+  --shadow-sm: 0 4px 6px -2px rgba(72, 84, 159, 0.1);
+  --shadow-md: 0 10px 20px -8px rgba(72, 84, 159, 0.25);
+  --shadow-lg: 0 20px 40px -12px rgba(72, 84, 159, 0.35);
+}
+
+/* LIGHT THEME */
+[data-theme='light'] {
+  --bg-app: #f8f8fb;
+  --bg-surface: #ffffff;
+  --bg-surface-alt: #f9fafe;
+  --bg-sidebar: #373b53;
+  --bg-input: #ffffff;
+  --bg-hover: #dfe3fa;
+
+  --text-primary: #0c0e16;
+  --text-secondary: #7e88c3;
+  --text-muted: #888eb0;
+  --text-inverse: #ffffff;
+
+  --border-color: #dfe3fa;
+  --border-input: #dfe3fa;
+
+  --status-paid-bg: rgba(51, 214, 159, 0.06);
+  --status-pending-bg: rgba(255, 143, 0, 0.06);
+  --status-draft-bg: rgba(55, 59, 83, 0.06);
+  --status-draft-text: #373b53;
+
+  --modal-overlay: rgba(0, 0, 0, 0.5);
+  --scrollbar-thumb: #dfe3fa;
+}
+
+/* DARK THEME */
+[data-theme='dark'] {
+  --bg-app: #141625;
+  --bg-surface: #1e2139;
+  --bg-surface-alt: #252945;
+  --bg-sidebar: #1e2139;
+  --bg-input: #1e2139;
+  --bg-hover: #252945;
+
+  --text-primary: #ffffff;
+  --text-secondary: #dfe3fa;
+  --text-muted: #888eb0;
+  --text-inverse: #ffffff;
+
+  --border-color: #252945;
+  --border-input: #252945;
+
+  --status-paid-bg: rgba(51, 214, 159, 0.06);
+  --status-pending-bg: rgba(255, 143, 0, 0.06);
+  --status-draft-bg: rgba(223, 227, 250, 0.06);
+  --status-draft-text: #dfe3fa;
+
+  --modal-overlay: rgba(0, 0, 0, 0.75);
+  --scrollbar-thumb: #252945;
+}
