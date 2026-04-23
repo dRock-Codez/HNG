@@ -1,0 +1,107 @@
+.invoice-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    'id     client'
+    'due    .'
+    'total  status';
+  gap: 8px 12px;
+  align-items: center;
+  padding: 24px;
+  background-color: var(--bg-surface);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--duration-fast) var(--ease-out),
+              transform var(--duration-fast) var(--ease-out),
+              box-shadow var(--duration-fast) var(--ease-out);
+  animation: slideInUp var(--duration-slow) var(--ease-out) both;
+}
+
+.invoice-card:hover,
+.invoice-card:focus-visible {
+  border-color: var(--color-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.invoice-card__id {
+  grid-area: id;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: -0.25px;
+  color: var(--text-primary);
+}
+
+.invoice-card__hash {
+  color: var(--text-muted);
+}
+
+.invoice-card__due {
+  grid-area: due;
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  letter-spacing: -0.1px;
+}
+[data-theme='dark'] .invoice-card__due {
+  color: #dfe3fa;
+}
+
+.invoice-card__client {
+  grid-area: client;
+  justify-self: end;
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+}
+[data-theme='dark'] .invoice-card__client {
+  color: #dfe3fa;
+}
+
+.invoice-card__total {
+  grid-area: total;
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.8px;
+}
+
+.invoice-card__status {
+  grid-area: status;
+  justify-self: end;
+  align-self: end;
+}
+
+.invoice-card__arrow {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .invoice-card {
+    grid-template-columns: 100px 150px 1fr 130px 120px 12px;
+    grid-template-areas: 'id due client total status arrow';
+    gap: 20px;
+    padding: 16px 24px 16px 32px;
+  }
+
+  .invoice-card__id,
+  .invoice-card__due,
+  .invoice-card__client,
+  .invoice-card__total,
+  .invoice-card__status {
+    justify-self: start;
+    align-self: center;
+  }
+
+  .invoice-card__client {
+    justify-self: start;
+  }
+
+  .invoice-card__total {
+    justify-self: end;
+  }
+
+  .invoice-card__arrow {
+    display: block;
+    justify-self: end;
+  }
+}
