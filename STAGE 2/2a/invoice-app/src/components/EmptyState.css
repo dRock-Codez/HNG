@@ -1,0 +1,31 @@
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 72px 24px;
+  text-align: center;
+  animation: fadeIn var(--duration-slow) var(--ease-out);
+}
+
+.empty__illustration {
+  width: 193px;
+  max-width: 70%;
+  height: auto;
+  display: block;
+}
+
+.empty__illustration:not(:last-child) {
+  margin-bottom: 24px;
+}
+
+@media (min-width: 768px) {
+  .empty__illustration {
+    width: 241px;
+  }
+
+  .empty__title {
+    font-size: 1.5rem;
+    margin-bottom: 24px;
+  }
+}
