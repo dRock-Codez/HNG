@@ -1,0 +1,136 @@
+.sidebar {
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  width: 100%;
+  height: var(--sidebar-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--bg-sidebar);
+  color: #fff;
+}
+
+.sidebar__logo {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--sidebar-height);
+  height: var(--sidebar-height);
+  background-color: var(--color-primary);
+  border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+  overflow: hidden;
+  transition: background-color var(--duration-base) var(--ease-out);
+}
+
+.sidebar__logo::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--color-primary-hover);
+  border-radius: var(--radius-lg) 0 0 0;
+}
+
+.sidebar__logo-inner {
+  position: relative;
+  z-index: 1;
+}
+
+.sidebar__actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding-right: 24px;
+}
+
+.sidebar__theme {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  color: #858bb2;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.sidebar__theme:hover {
+  color: #dfe3fa;
+}
+
+.sidebar__theme svg {
+  display: block;
+}
+
+.sidebar__divider {
+  width: 1px;
+  height: var(--sidebar-height);
+  background-color: #494e6e;
+}
+
+.sidebar__avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.sidebar__avatar:hover {
+  transform: scale(1.05);
+}
+
+@media (min-width: 768px) and (max-width: 1023.98px) {
+  .sidebar {
+    height: 80px;
+  }
+
+  .sidebar__logo {
+    width: 80px;
+    height: 80px;
+  }
+
+  .sidebar__divider {
+    height: 80px;
+  }
+
+  .sidebar__actions {
+    gap: 24px;
+    padding-right: 32px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    width: var(--sidebar-width);
+    height: 100vh;
+    flex-direction: column;
+    justify-content: space-between;
+    border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+  }
+
+  .sidebar__logo {
+    width: var(--sidebar-width);
+    height: var(--sidebar-width);
+  }
+
+  .sidebar__actions {
+    flex-direction: column;
+    gap: 32px;
+    padding: 0 0 24px 0;
+  }
+
+  .sidebar__divider {
+    width: 100%;
+    height: 1px;
+  }
+}

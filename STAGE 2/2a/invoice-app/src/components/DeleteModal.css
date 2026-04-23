@@ -1,0 +1,63 @@
+.delete-modal__overlay {
+  position: fixed;
+  inset: 0;
+  background-color: var(--modal-overlay);
+  backdrop-filter: blur(4px);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: fadeIn var(--duration-base) var(--ease-out);
+}
+
+.delete-modal {
+  width: 100%;
+  max-width: 480px;
+  background-color: var(--bg-surface);
+  border-radius: var(--radius-md);
+  padding: 48px;
+  box-shadow: var(--shadow-lg);
+  animation: scaleIn var(--duration-base) var(--ease-out);
+}
+
+.delete-modal__title {
+  font-size: 1.5rem;
+  letter-spacing: -0.5px;
+  margin-bottom: 12px;
+  color: var(--text-primary);
+}
+
+.delete-modal__description {
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  line-height: 1.85;
+  margin-bottom: 16px;
+}
+
+[data-theme='dark'] .delete-modal__description {
+  color: #dfe3fa;
+}
+
+.delete-modal__description strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.delete-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 480px) {
+  .delete-modal {
+    padding: 32px;
+  }
+
+  .delete-modal__actions {
+    justify-content: center;
+  }
+}
